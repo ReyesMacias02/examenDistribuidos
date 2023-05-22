@@ -11,7 +11,7 @@ DB_PASSWORD = 'admin'
 
 # Configuración del socket
 HOST = '127.0.0.1'
-PORT = 60080
+PORT = 60090
 BUFFER_SIZE = 1024
 
 # Conexión a la base de datos
