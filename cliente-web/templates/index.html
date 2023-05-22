@@ -1,50 +1,100 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Sistema de consulta y actualización de saldos</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
-
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+  </head>
+  <body>
     <div class="container">
-        <h1>Bienvenido al sistema de consulta y actualización de saldos</h1>
+      <h1>Bienvenido al sistema de consulta y actualización de saldos</h1>
 
-        <form method="POST" action="/">
-            <div class="form-group">
-                <label for="opcion">Seleccione una opción:</label>
-                <select class="form-control" id="opcion" name="opcion">
-                    <option value="1">Consultar información de un cliente</option>
-                    <option value="2">Agregar saldo a un cliente</option>
-                    <option value="0">Salir</option>
-                </select>
-            </div>
+      <form method="POST" action="/">
+        <div class="form-group">
+          <label for="opcion">Seleccione una opción:</label>
+          <select class="form-control" id="opcion" name="opcion">
+            <option value="1">Consultar información de un cliente</option>
+            <option value="2">Agregar saldo a un cliente</option>
+            <option value="0">Salir</option>
+          </select>
+        </div>
 
-            <div id="cedula-div" class="form-group">
-                <label for="cedula">Cédula del cliente:</label>
-                <input type="text" class="form-control" id="cedula" name="cedula">
-            </div>
+        <div id="cedula-div" class="form-group">
+          <label for="cedula">Cédula del cliente:</label>
+          <input type="text" class="form-control" id="cedula" name="cedula" />
+        </div>
 
-            <div id="saldo-div" class="form-group">
-                <label for="saldo">Saldo a agregar:</label>
-                <input type="text" class="form-control" id="saldo" name="saldo">
-            </div>
+        <div id="saldo-div" class="form-group" style="display: none;">
+          <label for="saldo">Saldo a agregar:</label>
+          <input type="text" class="form-control" id="saldo" name="saldo" />
+        </div>
 
-            <button type="submit" class="btn btn-primary">Enviar</button>
-        </form>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+      </form>
 
-        {% if table %}
-            <h2>Información del cliente:</h2>
-            {{ table|safe }}
-        {% endif %}
+      {% if 'response' in session %}
+      <h2>Respuesta del servidor:</h2>
+      <p>{{ session['response'] }}</p>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () { 
+            
+            swal({
+            title: "Respuesta del servidor",
+            text: "{{ session['cedula'] }}",
+            icon: "success",
+            button: "OK",
+          }).then(function () {
+            var cedula = "{{ session['cedula'] }}";
+            console.log(cedula)
+            if (cedula) {
+              var url = "/"; // URL a la que deseas enviar la solicitud POST
+          // Crear un objeto con los datos del formulario
+            var formData = new FormData();
+            formData.append('opcion', 1);
+            formData.append('cedula', cedula );
+            formData.append('saldo', 0);
 
-        {% if response %}
-            <h2>Respuesta del servidor:</h2>
-            <p>{{ response }}</p>
-        {% endif %}
+              axios
+                .post("/", formData)
+                .then(function (response) {
+                  // Lógica adicional después de recibir la respuesta
+                  // window.location.href = "/" + cedula;
+                  window.location.href = '/consulta/' + cedula;
+                })
+                .catch(function (error) {
+                  console.error(error);
+                });
+            }
+          });
+
+      
+        });
+      </script>
+      {% set _ = session.pop('response', None) %} {% endif %}
     </div>
+    <script>
+document.addEventListener("DOMContentLoaded", function() {
+  var residenceSelect = document.getElementById("opcion");
+  var saldoDiv = document.getElementById("saldo-div");
+  residenceSelect.addEventListener("change", function() {
+    var selectedOption = this.value;
+    if (selectedOption === "1") {
+              saldoDiv.style.display = "none";
+            } else {
+              saldoDiv.style.display = "block";
+            }
+  });
+});
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+  </body>
 </html>

@@ -1,9 +1,9 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request,session,redirect,jsonify
 from tabulate import tabulate
 import socket
 
 app = Flask(__name__)
-
+app.secret_key = 'mysecretkey'
 # Configuración del servidor
 SERVER_HOST = '127.0.0.1'
 SERVER_PORT = 60090
@@ -31,11 +31,14 @@ def close_connection():
     sock.close()
 
 @app.route('/', methods=['GET', 'POST'])
+
 def main_menu():
+    
     if request.method == 'POST':
         opcion = request.form['opcion']
         if opcion == '1':
-            return consultar_cliente()
+            cedula = request.form['cedula']
+            return redirect('/consulta/' + cedula)
         elif opcion == '2':
             return agregar_saldo()
         elif opcion == '0':
@@ -48,12 +51,13 @@ def main_menu():
 @app.route('/regresar')
 def regresar():
      return render_template('index.html', )
-def consultar_cliente():
+@app.route('/consulta/<cedula>')
+def consultar_cliente(cedula):
     # Consultar información de un cliente
-    cedula = request.form['cedula']
+    cedulas = cedula
     accion='consultar'
     saldo='0'
-    data = cedula + ',' + accion + ',' + saldo
+    data = cedulas + ',' + accion + ',' + saldo
     send_request(data)
     response = receive_response()
 
@@ -68,6 +72,8 @@ def consultar_cliente():
         headers = ['Apellidos', 'Nombres', 'Saldo']
         data = [[apellidos, nombres, saldo]]
         table = tabulate(data, headers, tablefmt='grid')
+        print('llego')
+        redirect('/')
         return render_template('tabla.html', data=data)
     else:
         return response
@@ -80,7 +86,11 @@ def agregar_saldo():
     data = cedula + ',' + accion + ',' + saldo
     send_request(data)
     response = receive_response()
-    return response
+    session['response'] = response
+    session['cedula'] = cedula
+    # Redirigir a la misma página
+    return redirect('/')
+
 
 # Conectar al servidor
 connect_to_server()
